@@ -1,0 +1,27 @@
+language: cpp
+addons:
+  apt:
+    packages:
+    - cmake
+before_install:
+  - sudo apt-get -y install libgtest-dev
+  - cd /usr/src/gtest
+install:
+  - sudo cmake .
+  - sudo make
+  - sudo cp *.a /usr/lib
+before_script:
+  - cd $TRAVIS_BUILD_DIR
+  - mkdir build
+  - cd build
+script:
+  - cmake ..
+  - cmake --build .
+  - cmake --build . --target test
+after_success:
+  - cmake --build . --target package
+deploy:
+  provider: script
+  skip_cleanup: true
+  script:
+  - curl -T ip_filter-$TRAVIS_BUILD_NUMBER-Linux.deb -uk-streltsov:$BINTRAY_API_KEY "https://api.bintray.com/content/k-streltsov/otus-cpp/ip_filter/$TRAVIS_BUILD_NUMBER/ip_filter-$TRAVIS_BUILD_NUMBER-Linux.deb;deb_distribution=trusty;deb_component=main;deb_architecture=amd64;publish=1"
